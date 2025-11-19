@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Drag Circle into Square</title>
+  <style>
+    canvas {
+      border: 1px solid black;
+      background-color: white;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="myCanvas" width="600" height="500"></canvas>
+
+<script>
+  const canvas = document.getElementById('myCanvas');
+  const ctx = canvas.getContext('2d');
+
+  const square = { x: 350, y: 150, size: 150 };
+  const circle = { x: 100, y: 200, radius: 50 };
+
+  let dragging = false;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+  let timerStarted = false;
+  let startTime = null;
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Draw square
+    ctx.fillStyle = 'lightblue';
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 2;
+    ctx.fillRect(square.x, square.y, square.size, square.size);
+    ctx.strokeRect(square.x, square.y, square.size, square.size);
+
+    // Draw circle
+    ctx.beginPath();
+    ctx.fillStyle = 'orange';
+    ctx.strokeStyle = 'black';
+    ctx.lineWidth = 2;
+    ctx.arc(circle.x, circle.y, circle.radius, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  function isInsideCircle(x, y) {
+    const dx = x - circle.x;
+    const dy = y - circle.y;
+    return dx * dx + dy * dy <= circle.radius * circle.radius;
+  }
+
+  function isCircleFullyInsideSquare() {
+    const left = circle.x - circle.radius;
+    const right = circle.x + circle.radius;
+    const top = circle.y - circle.radius;
+    const bottom = circle.y + circle.radius;
+
+    return (
+      left >= square.x &&
+      right <= square.x + square.size &&
+      top >= square.y &&
+      bottom <= square.y + square.size
+    );
+  }
+
+  canvas.addEventListener('mousedown', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const mouseX = e.clientX - rect.left;
+    const mouseY = e.clientY - rect.top;
+
+    if (isInsideCircle(mouseX, mouseY)) {
+      dragging = true;
+      dragOffsetX = mouseX - circle.x;
+      dragOffsetY = mouseY - circle.y;
+
+      if (!timerStarted) {
+        timerStarted = true;
+        startTime = new Date();
+        console.log("Timer started!");
+      }
+    }
+  });
+
+  canvas.addEventListener('mousemove', (e) => {
+    if (dragging) {
+      const rect = canvas.getBoundingClientRect();
+      circle.x = e.clientX - rect.left - dragOffsetX;
+      circle.y = e.clientY - rect.top - dragOffsetY;
+      draw();
+    }
+  });
+
+  canvas.addEventListener('mouseup', () => {
+    dragging = false;
+    if (isCircleFullyInsideSquare()) {
+      const endTime = new Date();
+      const timeTaken = ((endTime - startTime) / 1000).toFixed(2); // in seconds
+      alert(` Success! You placed the circle inside the square.\n Time taken: ${timeTaken} seconds.`);
+    }
+  });
+
+  draw();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Kinesthetic Task 10</title>
+	<style>
+		body { font-family: Inter, Segoe UI, Roboto, Arial, Helvetica, sans-serif; background:#f6f9fc; margin:0; padding:20px; display:flex; flex-direction:column; align-items:center; }
+		.wrapper { width: 720px; max-width: 95vw; background:#fff; border:2px solid #6C8EF3; border-radius:16px; padding:20px; box-shadow:0 6px 20px rgba(0,0,0,0.1); }
+		.title { font-weight:700; margin:0 0 6px 0; color:#2c3e50; }
+		.instructions { margin:0 0 16px 0; color:#546e7a; }
+		.board { display:flex; gap:16px; }
+		.column { flex:1; border:2px dashed #b0c4ff; border-radius:12px; background:#f2f6ff; min-height:260px; padding:12px; }
+		.column h3 { margin:6px 6px 12px 6px; color:#2c3e50; font-size:16px; }
+		.pool { display:flex; flex-wrap:wrap; gap:8px; }
+		.item { width:56px; height:56px; display:flex; align-items:center; justify-content:center; font-size:32px; background:#fff; border:2px solid #6C8EF3; border-radius:10px; cursor:grab; user-select:none; }
+		.item.dragging { opacity:0.7; }
+		.dropzone { display:flex; flex-wrap:wrap; gap:8px; min-height:200px; }
+		.success { display:none; margin-top:14px; padding:10px 12px; background:#e8f5e8; color:#2e7d32; border:2px solid #2e7d32; border-radius:10px; font-weight:700; }
+	</style>
+</head>
+<body>
+	<div class="wrapper">
+		<h2 class="title">Drag 4 balloons into the box</h2>
+		<p class="instructions">Move balloons to the right box. You can move as many as you like; the task completes at 4.</p>
+		<div class="board">
+			<div class="column">
+				<h3>Objects</h3>
+				<div id="pool" class="pool"></div>
+			</div>
+			<div class="column">
+				<h3>Drop Box</h3>
+				<div id="target" class="dropzone" aria-label="drop target"></div>
+			</div>
+		</div>
+		<div id="done" class="success" style="display:none"></div>
+	</div>
+	<script>
+		const TARGET_COUNT = 4;
+		const ITEM_EMOJI = '🎈';
+		const POOL_TOTAL = 10;
+
+		const pool = document.getElementById('pool');
+		const target = document.getElementById('target');
+		const done = document.getElementById('done');
+
+		function makeItem(){ const el=document.createElement('div'); el.className='item'; el.textContent=ITEM_EMOJI; el.draggable=true; el.addEventListener('dragstart',e=>{el.classList.add('dragging'); e.dataTransfer.setData('text/plain','item')}); el.addEventListener('dragend',()=>el.classList.remove('dragging')); return el; }
+		for(let i=0;i<POOL_TOTAL;i++) pool.appendChild(makeItem());
+
+		function enable(z){ z.addEventListener('dragover', e=>e.preventDefault()); z.addEventListener('drop', e=>{ e.preventDefault(); const d=document.querySelector('.item.dragging'); if(d&&d.parentElement!==z){ z.appendChild(d); } check(); }); }
+		enable(pool); enable(target);
+
+		let completionAnnounced=false; function check(){ const c=target.querySelectorAll('.item').length; if(c>=TARGET_COUNT && !completionAnnounced){ completionAnnounced=true; if(window.parent!==window){ window.parent.postMessage('task_completed','*'); } } }
+	</script>
+</body>
+</html>

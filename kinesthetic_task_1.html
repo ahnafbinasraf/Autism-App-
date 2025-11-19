@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kinesthetic Task 1: Drag Circle</title>
+    <style>
+        body { font-family: Arial, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px; background-color: #f0f8ff; }
+        .task-container { width: 600px; height: 400px; border: 3px solid #4CAF50; border-radius: 10px; position: relative; background-color: white; margin: 20px 0; }
+        .red-circle { width: 60px; height: 60px; background-color: #ff4444; border-radius: 50%; position: absolute; top: 50px; left: 50px; cursor: move; border: 2px solid #cc0000; }
+        .blue-square { width: 80px; height: 80px; background-color: #4444ff; position: absolute; top: 250px; right: 50px; border: 2px solid #0000cc; border-radius: 5px; }
+        .instructions { font-size: 18px; color: #333; text-align: center; margin-bottom: 10px; }
+        .success-message { display: none; font-size: 20px; color: #4CAF50; font-weight: bold; margin-top: 20px; }
+        .task-completed { background-color: #90EE90 !important; }
+    </style>
+</head>
+<body>
+    <h1>🎯 Kinesthetic Task 1</h1>
+    <div class="instructions">Drag the red circle to the blue square</div>
+    <div class="task-container" id="taskContainer">
+        <div class="red-circle" id="redCircle" draggable="true"></div>
+        <div class="blue-square" id="blueSquare"></div>
+    </div>
+    <div class="success-message" id="successMessage">🎉 Great job! Task completed! 🎉</div>
+    <script>
+        let draggedElement = null;
+        let taskCompleted = false;
+        
+        document.getElementById('redCircle').addEventListener('dragstart', function(e) { draggedElement = this; });
+        
+        document.getElementById('blueSquare').addEventListener('dragover', function(e) { e.preventDefault(); });
+        document.getElementById('blueSquare').addEventListener('drop', function(e) {
+            e.preventDefault();
+            if (draggedElement && draggedElement.id === 'redCircle') {
+                const square = this;
+                const circle = draggedElement;
+                circle.style.left = (square.offsetLeft + 10) + 'px';
+                circle.style.top = (square.offsetTop + 10) + 'px';
+                if (!taskCompleted) {
+                    taskCompleted = true;
+                    square.classList.add('task-completed');
+                    circle.classList.add('task-completed');
+                    document.getElementById('successMessage').style.display = 'block';
+                    if (window.parent !== window) { window.parent.postMessage('task_completed', '*'); }
+                }
+            }
+        });
+        
+        document.getElementById('taskContainer').addEventListener('dragover', function(e) { e.preventDefault(); });
+        document.getElementById('taskContainer').addEventListener('drop', function(e) {
+            e.preventDefault();
+            if (draggedElement) {
+                const rect = this.getBoundingClientRect();
+                const x = e.clientX - rect.left - 30;
+                const y = e.clientY - rect.top - 30;
+                const maxX = this.offsetWidth - 60;
+                const maxY = this.offsetHeight - 60;
+                draggedElement.style.left = Math.max(0, Math.min(x, maxX)) + 'px';
+                draggedElement.style.top = Math.max(0, Math.min(y, maxY)) + 'px';
+            }
+        });
+    </script>
+</body>
+</html>
